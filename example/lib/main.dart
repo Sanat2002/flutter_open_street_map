@@ -77,10 +77,15 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: FlutterOpenStreetMap(
+          buttonText: "Set Location",
+          locationIconColor: Colors.blue,
+          buttonforegroundColor: Colors.white,
+          buttonTextStyle: TextStyle(fontSize: 20),
           center: LatLong(5, 10),
           onPicked: (pickedData) {
             print(pickedData.latLong.latitude);
             print(pickedData.latLong.longitude);
+            print(pickedData.addressName);
             print(pickedData.address);
           }),
     );

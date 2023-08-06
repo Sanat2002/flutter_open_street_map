@@ -12,9 +12,29 @@ class FlutterOpenStreetMap extends StatefulWidget {
   final LatLong center;
   final void Function(PickedData pickedData) onPicked;
   final Color? primaryColor;
+  final String buttonText;
+  final IconData locationIcon;
+  final Color buttonforegroundColor;
+  final Color locationIconColor;
+  final double buttonWidth;
+  final double buttonHeight;
+  final TextStyle buttonTextStyle;
   final bool? showZoomButtons;
 
-  const FlutterOpenStreetMap({Key? key, required this.center, required this.onPicked, this.primaryColor, this.showZoomButtons}) : super(key: key);
+  FlutterOpenStreetMap(
+      {Key? key,
+      this.buttonHeight = 50,
+      this.buttonWidth = 300,
+      this.locationIconColor = Colors.blue,
+      this.locationIcon = Icons.location_pin,
+      this.buttonforegroundColor = Colors.white,
+      this.buttonTextStyle = const TextStyle(fontSize: 18),
+      this.buttonText = "Set Current Location",
+      required this.center,
+      required this.onPicked,
+      this.primaryColor,
+      this.showZoomButtons})
+      : super(key: key);
 
   @override
   State<FlutterOpenStreetMap> createState() => _FlutterOpenStreetMapState();
@@ -37,12 +57,15 @@ class _FlutterOpenStreetMapState extends State<FlutterOpenStreetMap> {
     if (kDebugMode) {
       print(longitude);
     }
-    String url = 'https://nominatim.openstreetmap.org/reverse?format=json&lat=$latitude&lon=$longitude&zoom=18&addressdetails=1';
+    String url =
+        'https://nominatim.openstreetmap.org/reverse?format=json&lat=$latitude&lon=$longitude&zoom=18&addressdetails=1';
 
     var response = await client.post(Uri.parse(url));
-    var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map<dynamic, dynamic>;
+    var decodedResponse =
+        jsonDecode(utf8.decode(response.bodyBytes)) as Map<dynamic, dynamic>;
 
-    _searchController.text = decodedResponse['display_name'] ?? "MOVE TO CURRENT POSITION";
+    _searchController.text =
+        decodedResponse['display_name'] ?? "MOVE TO CURRENT POSITION";
     setState(() {});
   }
 
@@ -56,12 +79,15 @@ class _FlutterOpenStreetMapState extends State<FlutterOpenStreetMap> {
     if (kDebugMode) {
       print(longitude);
     }
-    String url = 'https://nominatim.openstreetmap.org/reverse?format=json&lat=$latitude&lon=$longitude&zoom=18&addressdetails=1';
+    String url =
+        'https://nominatim.openstreetmap.org/reverse?format=json&lat=$latitude&lon=$longitude&zoom=18&addressdetails=1';
 
     var response = await client.post(Uri.parse(url));
-    var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map<dynamic, dynamic>;
+    var decodedResponse =
+        jsonDecode(utf8.decode(response.bodyBytes)) as Map<dynamic, dynamic>;
 
-    _searchController.text = decodedResponse['display_name'] ?? "MOVE TO CURRENT POSITION";
+    _searchController.text =
+        decodedResponse['display_name'] ?? "MOVE TO CURRENT POSITION";
     setState(() {});
   }
 
@@ -80,9 +106,13 @@ class _FlutterOpenStreetMapState extends State<FlutterOpenStreetMap> {
             'https://nominatim.openstreetmap.org/reverse?format=json&lat=${event.center.latitude}&lon=${event.center.longitude}&zoom=18&addressdetails=1';
 
         var response = await client.post(Uri.parse(url));
-        var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map<dynamic, dynamic>;
+        var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes))
+            as Map<dynamic, dynamic>;
 
-        _searchController.text = decodedResponse['display_name'];
+        _searchController.text = decodedResponse['display_name'] != null
+            ? decodedResponse['display_name']
+            : "This Location is not accessible";
+
         setState(() {});
       }
     });
@@ -99,10 +129,13 @@ class _FlutterOpenStreetMapState extends State<FlutterOpenStreetMap> {
   @override
   Widget build(BuildContext context) {
     OutlineInputBorder inputBorder = OutlineInputBorder(
-      borderSide: BorderSide(color: widget.primaryColor ?? Theme.of(context).primaryColor),
+      borderSide: BorderSide(
+          color: widget.primaryColor ?? Theme.of(context).primaryColor),
     );
     OutlineInputBorder inputFocusBorder = OutlineInputBorder(
-      borderSide: BorderSide(color: widget.primaryColor ?? Theme.of(context).primaryColor, width: 2.0),
+      borderSide: BorderSide(
+          color: widget.primaryColor ?? Theme.of(context).primaryColor,
+          width: 2.0),
     );
     final showZoom = widget.showZoomButtons ?? false;
 
@@ -112,11 +145,16 @@ class _FlutterOpenStreetMapState extends State<FlutterOpenStreetMap> {
         children: [
           Positioned.fill(
               child: FlutterMap(
-            options: MapOptions(center: LatLng(widget.center.latitude, widget.center.longitude), zoom: 15.0, maxZoom: 18, minZoom: 6),
+            options: MapOptions(
+                center: LatLng(widget.center.latitude, widget.center.longitude),
+                zoom: 15.0,
+                maxZoom: 18,
+                minZoom: 6),
             mapController: _mapController,
             layers: [
               TileLayerOptions(
-                urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                urlTemplate:
+                    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                 subdomains: ['a', 'b', 'c'],
                 // attributionBuilder: (_) {
                 //   return Text("© OpenStreetMap contributors");
@@ -138,11 +176,12 @@ class _FlutterOpenStreetMapState extends State<FlutterOpenStreetMap> {
                   }),
                 ),
               )),
-          const Positioned.fill(
+          Positioned.fill(
               child: IgnorePointer(
             child: Center(
               child: Icon(
-                Icons.location_pin,
+                widget.locationIcon,
+                color: widget.locationIconColor,
                 size: 50,
               ),
             ),
@@ -154,7 +193,8 @@ class _FlutterOpenStreetMapState extends State<FlutterOpenStreetMap> {
                 child: FloatingActionButton(
                   backgroundColor: Theme.of(context).primaryColor,
                   onPressed: () {
-                    _mapController.move(_mapController.center, _mapController.zoom + 1);
+                    _mapController.move(
+                        _mapController.center, _mapController.zoom + 1);
                   },
                   child: Icon(Icons.add),
                 )),
@@ -165,7 +205,8 @@ class _FlutterOpenStreetMapState extends State<FlutterOpenStreetMap> {
                 child: FloatingActionButton(
                   backgroundColor: Theme.of(context).primaryColor,
                   onPressed: () {
-                    _mapController.move(_mapController.center, _mapController.zoom - 1);
+                    _mapController.move(
+                        _mapController.center, _mapController.zoom - 1);
                   },
                   child: Icon(Icons.remove),
                 )),
@@ -192,23 +233,30 @@ class _FlutterOpenStreetMapState extends State<FlutterOpenStreetMap> {
                       onChanged: (String value) {
                         if (_debounce?.isActive ?? false) _debounce?.cancel();
 
-                        _debounce = Timer(const Duration(milliseconds: 2000), () async {
+                        _debounce =
+                            Timer(const Duration(milliseconds: 2000), () async {
                           if (kDebugMode) {
                             print(value);
                           }
                           var client = http.Client();
                           try {
-                            String url = 'https://nominatim.openstreetmap.org/search?q=$value&format=json&polygon_geojson=1&addressdetails=1';
+                            String url =
+                                'https://nominatim.openstreetmap.org/search?q=$value&format=json&polygon_geojson=1&addressdetails=1';
                             if (kDebugMode) {
                               print(url);
                             }
                             var response = await client.post(Uri.parse(url));
-                            var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as List<dynamic>;
+                            var decodedResponse =
+                                jsonDecode(utf8.decode(response.bodyBytes))
+                                    as List<dynamic>;
                             if (kDebugMode) {
                               print(decodedResponse);
                             }
                             _options = decodedResponse
-                                .map((e) => OSMdata(displayname: e['display_name'], lat: double.parse(e['lat']), lon: double.parse(e['lon'])))
+                                .map((e) => OSMdata(
+                                    displayname: e['display_name'],
+                                    lat: double.parse(e['lat']),
+                                    lon: double.parse(e['lon'])))
                                 .toList();
                             setState(() {});
                           } finally {
@@ -226,9 +274,13 @@ class _FlutterOpenStreetMapState extends State<FlutterOpenStreetMap> {
                         itemBuilder: (context, index) {
                           return ListTile(
                             title: Text(_options[index].displayname),
-                            subtitle: Text('${_options[index].lat},${_options[index].lon}'),
+                            subtitle: Text(
+                                '${_options[index].lat},${_options[index].lon}'),
                             onTap: () {
-                              _mapController.move(LatLng(_options[index].lat, _options[index].lon), 15.0);
+                              _mapController.move(
+                                  LatLng(
+                                      _options[index].lat, _options[index].lon),
+                                  15.0);
 
                               _focusNode.unfocus();
                               _options.clear();
@@ -248,7 +300,11 @@ class _FlutterOpenStreetMapState extends State<FlutterOpenStreetMap> {
             child: Center(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: CustomButton('Set Current Location', onPressed: () async {
+                child: CustomButton(widget.buttonText,
+                    width: widget.buttonWidth,
+                    height: widget.buttonHeight,
+                    foregroundcolor: widget.buttonforegroundColor,
+                    textstyle: widget.buttonTextStyle, onPressed: () async {
                   pickData().then((value) {
                     widget.onPicked(value);
                   });
@@ -262,15 +318,27 @@ class _FlutterOpenStreetMapState extends State<FlutterOpenStreetMap> {
   }
 
   Future<PickedData> pickData() async {
-    LatLong center = LatLong(_mapController.center.latitude, _mapController.center.longitude);
+    LatLong center = LatLong(
+        _mapController.center.latitude, _mapController.center.longitude);
     var client = http.Client();
     String url =
         'https://nominatim.openstreetmap.org/reverse?format=json&lat=${_mapController.center.latitude}&lon=${_mapController.center.longitude}&zoom=18&addressdetails=1';
 
     var response = await client.post(Uri.parse(url));
-    var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map<dynamic, dynamic>;
-    String displayName = decodedResponse['display_name'];
-    return PickedData(latLong: center, address: displayName);
+    var decodedResponse =
+        jsonDecode(utf8.decode(response.bodyBytes)) as Map<dynamic, dynamic>;
+
+    String displayName = "This Location is not accessible";
+    if (decodedResponse['display_name'] != null) {
+      displayName = decodedResponse['display_name'];
+    } else {
+      center = LatLong(0, 0);
+    }
+
+    return PickedData(
+        latLong: center,
+        addressName: displayName,
+        address: decodedResponse["address"]);
   }
 }
 
@@ -307,18 +375,23 @@ class LatLong {
 
 class PickedData {
   final LatLong latLong;
-  final String address;
+  final String addressName;
+  final Map<String, dynamic> address;
 
 //<editor-fold desc="Data Methods">
 
-  const PickedData({
-    required this.latLong,
-    required this.address,
-  });
+  const PickedData(
+      {required this.latLong,
+      required this.addressName,
+      required this.address});
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || (other is PickedData && runtimeType == other.runtimeType && latLong == other.latLong && address == other.address);
+      identical(this, other) ||
+      (other is PickedData &&
+          runtimeType == other.runtimeType &&
+          latLong == other.latLong &&
+          address == other.address);
 
   @override
   int get hashCode => latLong.hashCode ^ address.hashCode;
@@ -328,14 +401,12 @@ class PickedData {
     return 'PickedData{' + ' latLong: $latLong,' + ' address: $address,' + '}';
   }
 
-  PickedData copyWith({
-    LatLong? latLong,
-    String? address,
-  }) {
+  PickedData copyWith(
+      {LatLong? latLong, String? addressName, Map<String, dynamic>? address}) {
     return PickedData(
-      latLong: latLong ?? this.latLong,
-      address: address ?? this.address,
-    );
+        latLong: latLong ?? this.latLong,
+        addressName: addressName ?? this.addressName,
+        address: address ?? this.address);
   }
 
   Map<String, dynamic> toMap() {
@@ -348,7 +419,8 @@ class PickedData {
   factory PickedData.fromMap(Map<String, dynamic> map) {
     return PickedData(
       latLong: map['latLong'] as LatLong,
-      address: map['address'] as String,
+      addressName: map['addressName'] as String,
+      address: map['address'] as Map<String, dynamic>,
     );
   }
 
